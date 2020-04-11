@@ -16,3 +16,4 @@ pom.xml.asc
 /.env
 .idea
 node_modules/
+.shadow-cljs/
