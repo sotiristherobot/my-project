@@ -7,26 +7,31 @@
             [fipp.edn :as fedn]
             [my-project.pages.about :as about]
             [my-project.pages.login :as login]
-            [my-project.state.state :as state :refer [app-state match]]))
+            [my-project.state.state :as state :refer [app-state]]))
 
 (defn hello-world []
   [:div
    [:h1 (:text @app-state)]
    [:h3 "Edit and watch it change!"]])
 
-(defn current-page []
+(defn current-page
+  "This is the main container of the application. It loads the corresponding page"
+  []
   [:div
    (if-let [user (:user @app-state)]
-     (if @match
-       (let [view (:view (:data @match))]
-         [:div
-          [:h3 "Hello " user ","]
-          [:ul
-           [:li [:a {:href (rfe/href ::home)} "Home"]]
-           [:li [:a {:href (rfe/href ::about)} "About"]]]
-          [view @match]]))
+     ;; user is there so get match parameter from @app-state atom 
+     (let [match (get-in @app-state [:urlhelpers :match])]
+       (if match
+         (let [view (:view (:data match))]
+           [:div
+            [:h3 "Hello " user ","]
+            [:ul
+             [:li [:a {:href (rfe/href ::home)} "Home"]]
+             [:li [:a {:href (rfe/href ::about)} "About"]]]
+            [view match]])
+         [:h1 "Not found"]))
      [login/login-page])
-   [:pre (with-out-str (fedn/pprint @match))]])
+   [:pre (with-out-str (fedn/pprint (get-in @app-state [:urlhelpers :match])))]])
 
 (def routes
   [["/" {:name ::home :view hello-world}]
@@ -36,7 +41,7 @@
 (defn start []
   (rfe/start!
     (rf/router routes {:data {:coercion rss/coercion}})
-    (fn [m] (reset! match m))
+    (fn [m] (swap! app-state assoc-in [:urlhelpers :match] m))
     {:use-fragment false})
     (reagent/render-component [current-page]
       (. js/document (getElementById "app"))))
