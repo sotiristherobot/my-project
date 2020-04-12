@@ -6,37 +6,32 @@
             [spec-tools.data-spec :as ds]
             [fipp.edn :as fedn]
             [my-project.pages.about :as about]
-            ))
-
-;; define your app data so that it doesn't get over-written on reload
-
-(defonce app-state (atom {:text "Hello world!"}))
-(defonce match (atom nil))
+            [my-project.pages.login :as login]
+            [my-project.state.state :as state :refer [app-state match]]))
 
 (defn hello-world []
   [:div
    [:h1 (:text @app-state)]
-   [:h3 "Edit not and watch it change!"]])
-
+   [:h3 "Edit and watch it change!"]])
 
 (defn current-page []
-      [:div
-       [:ul
-        [:li [:a {:href (rfe/href ::home)} "Home"]]
-        [:li [:a {:href (rfe/href ::about)} "About"]]]
-       (if @match
-         (let [view (:view (:data @match))]
-              [view @match]))
-       [:pre (with-out-str (fedn/pprint @match))]])
-
+  [:div
+   (if-let [user (:user @app-state)]
+     (if @match
+       (let [view (:view (:data @match))]
+         [:div
+          [:h3 "Hello " user ","]
+          [:ul
+           [:li [:a {:href (rfe/href ::home)} "Home"]]
+           [:li [:a {:href (rfe/href ::about)} "About"]]]
+          [view @match]]))
+     [login/login-page])
+   [:pre (with-out-str (fedn/pprint @match))]])
 
 (def routes
-  [["/"
-    {:name ::home :view hello-world}]
-
-   ["/about" {:name ::about :view about/about-page}]
-   ])
-
+  [["/" {:name ::home :view hello-world}]
+   ["/login" {:name ::login :view login/login-page}]
+   ["/about" {:name ::about :view about/about-page :public? false}]])
 
 (defn start []
   (rfe/start!
