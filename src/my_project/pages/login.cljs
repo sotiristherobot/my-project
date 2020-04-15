@@ -8,6 +8,8 @@
   (println @app-state))
 
 (defn login-page []
+  (if (not (= js/window.location.pathname "/login"))
+    (set! js/window.location.href "/login"))
   [:div
    [:h1 "This is the login page"]
    [:input {:type "button" :value "Fake login" :on-click on-button-click}]])
