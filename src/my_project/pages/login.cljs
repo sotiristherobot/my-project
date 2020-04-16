@@ -9,8 +9,8 @@
       (swap! app-state assoc :user "Sotiris")
       (println @app-state))
 
-(def form-template
-  [:div
+(def login-form-template
+  [:form
    [:div[:label "username: "
         [:input.form-control {:field :text :id :username}]]]
    [:div[:label "password: "
@@ -18,7 +18,7 @@
 
 (defn login-form []
       (let [doc (r/atom {:username "Sotiris" :pass "1234"})]
-           [bind-fields form-template doc
+           [bind-fields login-form-template doc
             (fn [id path value]
                 (println @doc))]))
 
